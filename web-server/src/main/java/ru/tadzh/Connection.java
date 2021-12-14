@@ -1,26 +1,53 @@
 package ru.tadzh;
 
-import java.io.IOException;
-import java.net.ServerSocket;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Deque;
+import java.util.LinkedList;
 
-public class Connection {
-    private final Handler handler;
+public class Connection implements Closeable {
 
-    public Connection() {
-        handler = new Handler();
+    private final Socket socket;
+
+    public Connection(Socket socket) {
+        this.socket = socket;
     }
 
-    public void connect() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(Common.getPORT())) {
-            System.out.println("Server started!");
-            while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("New client connected!");
-                new Thread(() -> handler.handleRequest(socket)).start();
+    public Deque<String> readRequest() {
+        try {
+            BufferedReader input = new BufferedReader(
+                    new InputStreamReader(
+                            socket.getInputStream(), StandardCharsets.UTF_8));
+
+            while (!input.ready()) ;
+
+            Deque<String> request = new LinkedList<>();
+            while (input.ready()) {
+                String line = input.readLine();
+                System.out.println(line);
+                request.add(line);
             }
+            return request;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public void writeResponse(String rawResponse) {
+        try {
+            PrintWriter output = new PrintWriter(socket.getOutputStream());
+            output.print(rawResponse);
+            output.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (!socket.isClosed()) {
+            socket.close();
         }
     }
 }
