@@ -1,52 +1,33 @@
 package ru.tadzh;
 
-import java.io.BufferedReader;
+import ru.tadzh.domain.HttpRequest;
+import ru.tadzh.domain.HttpResponse;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Deque;
+import static ru.tadzh.Common.*;
 
-public class Handler {
+public class Handler implements Runnable {
 
-    static void handleRequest(Socket socket) {
-        try (BufferedReader input = new BufferedReader(
-                new InputStreamReader(
-                        socket.getInputStream(), StandardCharsets.UTF_8));
-             PrintWriter output = new PrintWriter(socket.getOutputStream())
-        ) {
-            while (!input.ready()) ;
+    private final Connection connection;
+    private final RequestParser requestParser;
 
-            String firstLine = input.readLine();
-            String[] parts = firstLine.split(" ");
-            System.out.println(firstLine);
-            while (input.ready()) {
-                System.out.println(input.readLine());
-            }
+    public Handler(Connection connection, RequestParser requestParser) {
+        this.connection = connection;
+        this.requestParser = requestParser;
+    }
 
-            Path path = Paths.get(Common.getWWW(), parts[1]);
-            if (!Files.exists(path)) {
-                output.println("HTTP/1.1 404 NOT_FOUND");
-                output.println("Content-Type: text/html; charset=utf-8");
-                output.println();
-                output.println("<h1>Файл не найден!</h1>");
-                output.flush();
-                return;
-            }
-
-            output.println("HTTP/1.1 200 OK");
-            output.println("Content-Type: text/html; charset=utf-8");
-            output.println();
-
-            Files.newBufferedReader(path).transferTo(output);
-
-            System.out.println("Client disconnected!");
+    @Override
+    public void run() {
+        Deque<String> rawRequest = connection.readRequest();
+        HttpRequest httpRequest = requestParser.parseRequest(rawRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.getResponse(httpRequest, connection);
+        try {
+            connection.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
+        System.out.println(CLIENT_DISCONNECTED);
     }
 }
 
