@@ -11,6 +11,7 @@
     <modules>
         <module>web-server</module>
         <module>patterns-in-java</module>
+        <module>lesson5</module>
     </modules>
 
     <properties>
