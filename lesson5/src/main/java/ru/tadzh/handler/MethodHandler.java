@@ -9,15 +9,15 @@ import ru.tadzh.service.SocketService;
 
 public abstract class MethodHandler {
 
-    private final String method;
+    private  String method;
 
-    private final MethodHandler next;
+    private  MethodHandler next;
 
-    protected final SocketService socketService;
+    protected  SocketService socketService;
 
-    protected final ResponseSerializer responseSerializer;
+    protected  ResponseSerializer responseSerializer;
 
-    protected final Config config;
+    protected  Config config;
 
     public MethodHandler(String method, MethodHandler next, SocketService socketService, ResponseSerializer responseSerializer, Config config) {
         this.method = method;
@@ -26,6 +26,11 @@ public abstract class MethodHandler {
         this.responseSerializer = responseSerializer;
         this.config = config;
     }
+
+    public MethodHandler() {
+
+    }
+
 
     public void handle(HttpRequest request) {
         HttpResponse response;
