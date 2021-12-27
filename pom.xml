@@ -12,6 +12,7 @@
         <module>web-server</module>
         <module>patterns-in-java</module>
         <module>lesson5</module>
+        <module>lesson6</module>
     </modules>
 
     <properties>
