@@ -11,12 +11,23 @@ public class UserMapper {
 
     private final PreparedStatement selectUser;
 
+    private final PreparedStatement insertUser;
+
+    private final PreparedStatement deleteUser;
+
+    private final PreparedStatement updateUser;
+
     private final Map<Long, User> identityMap = new HashMap<>();
 
     public UserMapper(Connection conn) {
         this.conn = conn;
         try {
-            this.selectUser = conn.prepareStatement("select id, username, password from users where id = ?;");
+            this.selectUser = conn.prepareStatement("select id, login, password from user where id = ?;");
+            this.insertUser = conn.prepareStatement("insert into users.user (id, login, password) values (?, ?, ?);");;
+            this.deleteUser = conn.prepareStatement("delete from users.user where id = ?;");;
+            this.updateUser = conn.prepareStatement("update users.user set login=?, password=? where id = ?;");;
+
+
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
@@ -39,5 +50,44 @@ public class UserMapper {
             throw new IllegalStateException(e);
         }
         return Optional.empty();
+    }
+
+    public void deleteById(User user) {
+        if (identityMap.get(user.getId()) != null) {
+            identityMap.remove(user.getId());
+        }
+        try {
+            deleteUser.setLong(1, user.getId());
+            deleteUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertUser(User user) {
+        identityMap.putIfAbsent(user.getId(), user);
+        try {
+            insertUser.setLong(1, user.getId());
+            insertUser.setString(2, user.getLogin());
+            insertUser.setString(3, user.getPassword());
+            insertUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateUser(User user) {
+        if (identityMap.get(user.getId()) != null) {
+            identityMap.get(user.getId()).setLogin(user.getLogin());
+            identityMap.get(user.getId()).setPassword(user.getPassword());
+        }
+        try {
+            updateUser.setLong(3, user.getId());
+            updateUser.setString(1, user.getLogin());
+            updateUser.setString(2, user.getPassword());
+            updateUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
