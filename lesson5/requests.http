@@ -1,0 +1,13 @@
+GET http://localhost:8081
+
+###
+
+POST http://localhost:8081
+
+###
+
+PUT http://localhost:8081
+
+###
+
+DELETE http://localhost:8081
