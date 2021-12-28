@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DataBaseService {
+public class ShemaService {
     static Statement statement;
     static Connection connection;
 
