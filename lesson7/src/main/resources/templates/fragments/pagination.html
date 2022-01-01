@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
+<a th:fragment="pagination_books(nameBtn, numPage)" class="page-link"
+   th:href="@{/books(page=${numPage},
+            size=${books.size},
+            titleFilter=${param.titleFilter},
+            publicationDateFilter=${param.publicationDateFilter},
+            isbnFilter=${param.isbnFilter},
+            sorting=${param.sorting},
+            sortingParam=${param.sortingParam})}">[[${nameBtn}]]
+</a>
+
+</a>
+</html>
